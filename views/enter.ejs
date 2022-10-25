@@ -66,23 +66,59 @@
 				const text = document.getElementById('formGroupExampleInput').value
 				const url = document.getElementById('formGroupExampleInput2').value
 				const files = document.getElementById('exampleFormControlFile1')
+				if(text == '' && url =='' && files.files.length ===0){
+					alert('At most one field needs to filled');
+					return
+				}
 				const formData = new FormData()
 				formData.append('text', text)
 				formData.append('url', url)
 				for (let i = 0; i < files.files.length; i++) {
 					formData.append('files', files.files[i])
 				}
-				fetch('https://innoapps.outshade.com/imageview', {
+				fetch('https://espace.protocol.in/imageview', {
 					method: 'POST',
 					body: formData,
 				})
 					.then(async (res) => {
 						// alert(JSON.stringify(res.body))
 						let json = await res.json()
-            alert('Content Uploaded');
+						alert('Content Uploaded')
 					})
 					.catch((err) => ('Error occured', err))
 			}
+		</script>
+		<script>
+			let message_input = document.querySelector('#formGroupExampleInput')
+			let url_input = document.querySelector('#formGroupExampleInput2')
+			let image_input = document.querySelector('#exampleFormControlFile1')
+			const onChange =(ev) => {
+				let el = ev.target
+				let el_id = ev.target.id
+				let message_input_id = message_input.getAttribute('id')
+				let url_input_id = url_input.getAttribute('id')
+				let image_input_id = image_input.getAttribute('id')
+				switch (el_id) {
+					case message_input_id: {
+						url_input.value = ''
+						image_input.value = ''
+						return
+					}
+					case url_input_id: {
+						message_input.value = ''
+						image_input.value = ''
+						return
+					}
+					case image_input_id: {
+						url_input.value = ''
+						message_input.value = ''
+						return
+					}
+				}
+			}
+			message_input.addEventListener('input', onChange)
+			url_input.addEventListener('input', onChange)
+			image_input.addEventListener('input', onChange)
 		</script>
 		<!-- Optional JavaScript -->
 		<!-- jQuery first, then Popper.js, then Bootstrap JS -->

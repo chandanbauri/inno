@@ -5,6 +5,16 @@ const multer = require("multer");
 const fs = require('fs');
 const path = require('path')
 const app = express();
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+
+const httpServer = createServer(app);
+const io = new Server(httpServer, {});
+
+io.on("connection", (socket) => {
+    console.log('websocket initialised');
+});
+
 const multerStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, __dirname + "/uploads/");
@@ -19,9 +29,9 @@ const upload = multer({
     storage: multerStorage
 });
 
-app.listen(3300, async () => {
+httpServer.listen(3300, async () => {
     try {
-        
+
         await client.connect();
     } catch (error) {
         throw error
@@ -55,11 +65,13 @@ app.set('view engine', 'ejs');
 // Navigation
 app.get('/', async (req, res) => {
     let getLastEntry = 'select * from innoappspoc ORDER BY timestamp DESC limit 1;'
-    let response  = await client.query(getLastEntry, []);
+    let response = await client.query(getLastEntry, []);
     let lastEntry = response.rows[0]
+    console.log(lastEntry?.yt + '?autoplay=1')
     res.render('imageview', {
-        text: '',
-        image: path.join('uploads', lastEntry?.imageurl)
+        text: lastEntry?.message ?? '',
+        url: lastEntry?.yt === '' ? '' : lastEntry?.yt + '?autoplay=1',
+        image: lastEntry?.imageurl == '' ? '' : path.join('uploads', lastEntry?.imageurl)
     });
 });
 
@@ -74,14 +86,15 @@ app.post('/imageview', upload.array("files"), async (req, res) => {
     }
     let insertQuery = `insert into innoappspoc (imageurl, message, yt) values ( $1, $2,$3);`
 
-    await client.query(insertQuery,[innoappspoc.imageurl , innoappspoc.message ,innoappspoc.yt])
+    await client.query(insertQuery, [innoappspoc.imageurl, innoappspoc.message, innoappspoc.yt])
+    io.emit('entry-load');
     client.end;
     res.json({
         text: req.body.text,
         yt: req.body.url,
         image: req.file_path,
     });
-   
+
 });
 
 app.get('/enter', (req, res) => {

@@ -38,8 +38,8 @@ app.use(
 );
 
 // Static Files
-app.use(express.static('public'))
-app.use(express.static('uploads'));
+app.use(express.static("public"))
+app.use(express.static("uploads"));
 app.use('/uploads', express.static(__dirname + '/uploads'))
 app.use('/css', express.static(__dirname + 'public/css'))
 app.use('/js', express.static(__dirname + 'public/js'))

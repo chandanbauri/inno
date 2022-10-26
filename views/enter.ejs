@@ -56,18 +56,65 @@
 				>
 			</form>
 		</div>
+		<script src="/js/editor/ckeditor/ckeditor.js"></script>
 		<script>
+			let message_input = document.querySelector('#formGroupExampleInput')
+			let url_input = document.querySelector('#formGroupExampleInput2')
+			let image_input = document.querySelector('#exampleFormControlFile1')
+			let editor = CKEDITOR.replace('formGroupExampleInput')
+			editor.on('change', function (evt) {
+				// getData() returns CKEditor's HTML content.
+				let url_input = document.querySelector('#formGroupExampleInput2')
+				let image_input = document.querySelector('#exampleFormControlFile1')
+
+				url_input.value = ''
+				image_input.value = ''
+				console.log(evt.editor.getData())
+				// console.log('Total bytes: ' + evt.editor.getData().length)
+			})
+			const onChange = (ev) => {
+				let el = ev.target
+				let el_id = ev.target.id
+				let message_input_id = message_input.getAttribute('id')
+				let url_input_id = url_input.getAttribute('id')
+				let image_input_id = image_input.getAttribute('id')
+				console.log(el.value)
+				switch (el_id) {
+					case message_input_id: {
+						url_input.value = ''
+						image_input.value = ''
+						return
+					}
+					case url_input_id: {
+						message_input.value = ''
+						image_input.value = ''
+						editor.setData('');
+						return
+					}
+					case image_input_id: {
+						url_input.value = ''
+						message_input.value = ''
+						editor.setData('');
+						return
+					}
+				}
+			}
+			message_input.addEventListener('input', onChange)
+			url_input.addEventListener('input', onChange)
+			image_input.addEventListener('input', onChange)
+		
 			const form = document.getElementById('op-form')
 
 			form.addEventListener('submit', submitForm)
 
 			function submitForm(e) {
 				e.preventDefault()
-				const text = document.getElementById('formGroupExampleInput').value
+				let text = document.getElementById('formGroupExampleInput').value
 				const url = document.getElementById('formGroupExampleInput2').value
 				const files = document.getElementById('exampleFormControlFile1')
-				if(text == '' && url =='' && files.files.length ===0){
-					alert('At most one field needs to filled');
+				text = editor.getData().toString();
+				if (text == '' && url == '' && files.files.length === 0) {
+					alert('At most one field needs to filled')
 					return
 				}
 				const formData = new FormData()
@@ -76,7 +123,8 @@
 				for (let i = 0; i < files.files.length; i++) {
 					formData.append('files', files.files[i])
 				}
-				fetch('https://espace.protocol.in/imageview', {
+				// https://espace.protocol.in/imageview
+				fetch('http://localhost:3300/imageview', {
 					method: 'POST',
 					body: formData,
 				})
@@ -87,38 +135,6 @@
 					})
 					.catch((err) => ('Error occured', err))
 			}
-		</script>
-		<script>
-			let message_input = document.querySelector('#formGroupExampleInput')
-			let url_input = document.querySelector('#formGroupExampleInput2')
-			let image_input = document.querySelector('#exampleFormControlFile1')
-			const onChange =(ev) => {
-				let el = ev.target
-				let el_id = ev.target.id
-				let message_input_id = message_input.getAttribute('id')
-				let url_input_id = url_input.getAttribute('id')
-				let image_input_id = image_input.getAttribute('id')
-				switch (el_id) {
-					case message_input_id: {
-						url_input.value = ''
-						image_input.value = ''
-						return
-					}
-					case url_input_id: {
-						message_input.value = ''
-						image_input.value = ''
-						return
-					}
-					case image_input_id: {
-						url_input.value = ''
-						message_input.value = ''
-						return
-					}
-				}
-			}
-			message_input.addEventListener('input', onChange)
-			url_input.addEventListener('input', onChange)
-			image_input.addEventListener('input', onChange)
 		</script>
 		<!-- Optional JavaScript -->
 		<!-- jQuery first, then Popper.js, then Bootstrap JS -->

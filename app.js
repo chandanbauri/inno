@@ -7,6 +7,7 @@ const path = require('path')
 const app = express();
 const { createServer } = require("http");
 const { Server } = require("socket.io");
+const cheerio = require("cheerio");
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {});
@@ -67,9 +68,9 @@ app.get('/', async (req, res) => {
     let getLastEntry = 'select * from innoappspoc ORDER BY timestamp DESC limit 1;'
     let response = await client.query(getLastEntry, []);
     let lastEntry = response.rows[0]
-    console.log(lastEntry?.yt + '?autoplay=1')
+    // console.log(cheerio.load(lastEntry?.message, null, false).html());
     res.render('imageview', {
-        text: lastEntry?.message ?? '',
+        text: lastEntry?.message == '' ? '' : cheerio.load(lastEntry?.message, null, false).html(),
         url: lastEntry?.yt === '' ? '' : lastEntry?.yt + '?autoplay=1',
         image: lastEntry?.imageurl == '' ? '' : path.join('uploads', lastEntry?.imageurl)
     });

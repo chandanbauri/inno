@@ -49,6 +49,33 @@
 						name="file"
 						id="exampleFormControlFile1" />
 				</div>
+				<span><b>Select Screen</b></span>
+				<div class="form-group">
+					<input
+						id="screen-1"
+						type="radio"
+						name="screen"
+						value="1" />
+					<label for="screen-1">Screen 1</label>
+					<input
+						id="screen-2"
+						type="radio"
+						name="screen"
+						value="2" />
+					<label for="screen-2">Screen 2</label>
+					<input
+						id="screen-3"
+						type="radio"
+						name="screen"
+						value="3" />
+					<label for="screen-3">Screen 3</label>
+					<input
+						id="screen-4"
+						type="radio"
+						name="screen"
+						value="4" />
+					<label for="screen-4">SCreen 4</label>
+				</div>
 				<button
 					type="submit"
 					class="btn btn-primary"
@@ -61,6 +88,7 @@
 			let message_input = document.querySelector('#formGroupExampleInput')
 			let url_input = document.querySelector('#formGroupExampleInput2')
 			let image_input = document.querySelector('#exampleFormControlFile1')
+			let screens = document.getElementsByName('screen')
 			let editor = CKEDITOR.replace('formGroupExampleInput')
 			editor.on('change', function (evt) {
 				// getData() returns CKEditor's HTML content.
@@ -88,13 +116,13 @@
 					case url_input_id: {
 						message_input.value = ''
 						image_input.value = ''
-						editor.setData('');
+						editor.setData('')
 						return
 					}
 					case image_input_id: {
 						url_input.value = ''
 						message_input.value = ''
-						editor.setData('');
+						editor.setData('')
 						return
 					}
 				}
@@ -102,17 +130,23 @@
 			message_input.addEventListener('input', onChange)
 			url_input.addEventListener('input', onChange)
 			image_input.addEventListener('input', onChange)
-		
+
 			const form = document.getElementById('op-form')
 
 			form.addEventListener('submit', submitForm)
 
 			function submitForm(e) {
 				e.preventDefault()
+				let screen = 1
+				screens.forEach((el) => {
+					if (el.checked) {
+						screen = el.value
+					}
+				})
 				let text = document.getElementById('formGroupExampleInput').value
 				const url = document.getElementById('formGroupExampleInput2').value
 				const files = document.getElementById('exampleFormControlFile1')
-				text = editor.getData().toString();
+				text = editor.getData().toString()
 				if (text == '' && url == '' && files.files.length === 0) {
 					alert('At most one field needs to filled')
 					return
@@ -120,11 +154,13 @@
 				const formData = new FormData()
 				formData.append('text', text)
 				formData.append('url', url)
+				formData.append('screen', screen)
 				for (let i = 0; i < files.files.length; i++) {
 					formData.append('files', files.files[i])
 				}
-				// 
+				//
 				fetch('https://espace.protocol.in/imageview', {
+				// fetch('http://localhost:3300/imageview', {
 					method: 'POST',
 					body: formData,
 				})

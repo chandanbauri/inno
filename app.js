@@ -65,7 +65,40 @@ app.set('view engine', 'ejs');
 
 // Navigation
 app.get('/', async (req, res) => {
-    let getLastEntry = 'select * from innoappspoc ORDER BY timestamp DESC limit 1;'
+    let getLastEntry = 'select * from innoappspoc WHERE screen=1 ORDER BY timestamp DESC limit 1;'
+    let response = await client.query(getLastEntry, []);
+    let lastEntry = response.rows[0]
+    // console.log(cheerio.load(lastEntry?.message, null, false).html());
+    res.render('imageview', {
+        text: lastEntry?.message == '' ? '' : cheerio.load(lastEntry?.message, null, false).html(),
+        url: lastEntry?.yt === '' ? '' : lastEntry?.yt + '?autoplay=1',
+        image: lastEntry?.imageurl == '' ? '' : path.join('uploads', lastEntry?.imageurl)
+    });
+});
+app.get('/screen-1', async (req, res) => {
+    let getLastEntry = 'select * from innoappspoc WHERE screen=2 ORDER BY timestamp DESC limit 1;'
+    let response = await client.query(getLastEntry, []);
+    let lastEntry = response.rows[0]
+    // console.log(cheerio.load(lastEntry?.message, null, false).html());
+    res.render('imageview', {
+        text: lastEntry?.message == '' ? '' : cheerio.load(lastEntry?.message, null, false).html(),
+        url: lastEntry?.yt === '' ? '' : lastEntry?.yt + '?autoplay=1',
+        image: lastEntry?.imageurl == '' ? '' : path.join('uploads', lastEntry?.imageurl)
+    });
+});
+app.get('/screen-2', async (req, res) => {
+    let getLastEntry = 'select * from innoappspoc WHERE screen=3 ORDER BY timestamp DESC limit 1;'
+    let response = await client.query(getLastEntry, []);
+    let lastEntry = response.rows[0]
+    // console.log(cheerio.load(lastEntry?.message, null, false).html());
+    res.render('imageview', {
+        text: lastEntry?.message == '' ? '' : cheerio.load(lastEntry?.message, null, false).html(),
+        url: lastEntry?.yt === '' ? '' : lastEntry?.yt + '?autoplay=1',
+        image: lastEntry?.imageurl == '' ? '' : path.join('uploads', lastEntry?.imageurl)
+    });
+});
+app.get('/screen-3', async (req, res) => {
+    let getLastEntry = 'select * from innoappspoc WHERE screen=4 ORDER BY timestamp DESC limit 1;'
     let response = await client.query(getLastEntry, []);
     let lastEntry = response.rows[0]
     // console.log(cheerio.load(lastEntry?.message, null, false).html());
@@ -83,17 +116,19 @@ app.post('/imageview', upload.array("files"), async (req, res) => {
         id: '',
         imageurl: req.file_path ?? '',
         message: req.body.text ?? '',
-        yt: req.body.url ?? ''
+        yt: req.body.url ?? '',
+        screen: req.body.screen ?? 1,
     }
-    let insertQuery = `insert into innoappspoc (imageurl, message, yt) values ( $1, $2,$3);`
+    let insertQuery = `insert into innoappspoc (imageurl, message, yt,screen) values ( $1, $2,$3,$4);`
 
-    await client.query(insertQuery, [innoappspoc.imageurl, innoappspoc.message, innoappspoc.yt])
+    await client.query(insertQuery, [innoappspoc.imageurl, innoappspoc.message, innoappspoc.yt, innoappspoc.screen])
     io.emit('entry-load');
     client.end;
     res.json({
         text: req.body.text,
         yt: req.body.url,
         image: req.file_path,
+        screen: req.body.screen ?? 1
     });
 
 });
